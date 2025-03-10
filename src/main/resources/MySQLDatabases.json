@@ -1,0 +1,22 @@
+[{
+  "configName": "MySQL_MainDB",
+  "databaseHost": "localhost",
+  "databasePort": 3306,
+  "databaseName": "backup_db",
+  "mysqlUsername": "root",
+  "mysqlPassword": "adel_mysql",
+  "backupsLocation": "/home/adel/ADEL/MySQLbackups",
+  "backupCommandOptions": "",
+  "restoreCommandOptions": ""
+},{
+  "configName": "MySQL_ProductDB",
+  "databaseHost": "localhost",
+  "databasePort": 3306,
+  "databaseName": "product_db",
+  "mysqlUsername": "root",
+  "mysqlPassword": "adel_mysql",
+  "backupsLocation": "/home/adel/ADEL",
+  "backupCommandOptions": "",
+  "restoreCommandOptions": ""
+}
+]
