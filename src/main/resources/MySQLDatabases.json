@@ -5,7 +5,7 @@
   "databaseName": "backup_db",
   "mysqlUsername": "root",
   "mysqlPassword": "adel_mysql",
-  "backupsLocation": "/home/adel/ADEL/MySQLbackups",
+  "backupsLocation": "/home/adel/ADEL/PFE/SECOND_DB",
   "backupCommandOptions": "",
   "restoreCommandOptions": ""
 },{
@@ -15,7 +15,7 @@
   "databaseName": "product_db",
   "mysqlUsername": "root",
   "mysqlPassword": "adel_mysql",
-  "backupsLocation": "/home/adel/ADEL",
+  "backupsLocation": "/home/adel/ADEL/PFE/FIRST_DB",
   "backupCommandOptions": "",
   "restoreCommandOptions": ""
 }

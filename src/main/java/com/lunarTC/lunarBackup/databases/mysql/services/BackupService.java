@@ -3,9 +3,10 @@ package com.lunarTC.lunarBackup.databases.mysql.services;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.WeekFields;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import com.lunarTC.lunarBackup.databases.utils.DatabaseUtils;
@@ -22,86 +23,127 @@ public class BackupService {
     @Autowired
     MySQLConfigLoader mysqlConfigLoader;
 
-    @Scheduled(cron = "0 */1 * * * ?")
+    // @Scheduled(cron = "0 0 1 * * ?") // Runs daily at 1 AM (Commented for testing)
+    @Scheduled(cron = "0 * * * * ?") // Runs every minute for testing
     public void DailyBackup() {
-        List<MySQLDatabaseConfig> databases = mysqlConfigLoader.getDatabases(); // Get database list dynamically
+        List<MySQLDatabaseConfig> databases = mysqlConfigLoader.getDatabases();
 
         for (MySQLDatabaseConfig database : databases) {
             try {
-                // Ensure backupsLocation exists
-                         File backupsDir = new File(database.getBackupsLocation());
+                File backupsDir = new File(database.getBackupsLocation());
                 if (!backupsDir.exists()) {
                     backupsDir.mkdirs();
                 }
 
-                // Create daily backup folder with database name
-                File dailyBackupDir = new File(backupsDir, "dailyBackup_" + database.getDatabaseName());
+                File dailyBackupDir = new File(backupsDir, "Daily_" + database.getDatabaseName());
                 if (!dailyBackupDir.exists()) {
                     dailyBackupDir.mkdirs();
                 }
 
-                // Generate backup file path with date format (dd-MM-yyyy)
-               /* String date = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-                String backupFile = new File(dailyBackupDir, database.getDatabaseName() + "_backup_" + date + ".sql").getAbsolutePath();*/
+                String date = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                String backupFile = new File(dailyBackupDir, database.getDatabaseName() + "_backup_" + date + ".sql").getAbsolutePath();
 
-                String dateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm"));
-                String backupFile = new File(dailyBackupDir, database.getDatabaseName() + "_backup_" + dateTime + ".sql").getAbsolutePath();
-
-
-                // Execute backup
                 executeMySQLBackup(database, backupFile);
-                System.out.println("Backup completed successfully for database: " + database.getDatabaseName());
+                System.out.println("Daily Backup completed for database: " + database.getDatabaseName());
             } catch (Exception e) {
-                System.err.println("Backup failed for database: " + database.getDatabaseName() + " - " + e.getMessage());
+                System.err.println("Daily Backup failed for database: " + database.getDatabaseName() + " - " + e.getMessage());
             }
         }
     }
 
-    public void WeeklyBackup() {
 
+
+    // @Scheduled(cron = "0 0 2 ? * SAT") // Runs every Saturday at 2 AM
+    @Scheduled(cron = "0 */2 * * * ?") // Runs every 2 minutes for testing
+    public void WeeklyBackup() {
+        List<MySQLDatabaseConfig> databases = mysqlConfigLoader.getDatabases();
+        LocalDate today = LocalDate.now();
+
+        // Format current date as "dd-MM-yyyy"
+        String currentDate = today.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+
+        for (MySQLDatabaseConfig database : databases) {
+            try {
+                File backupsDir = new File(database.getBackupsLocation());
+                if (!backupsDir.exists()) {
+                    backupsDir.mkdirs();
+                }
+
+                File weeklyBackupDir = new File(backupsDir, "Weekly_" + database.getDatabaseName());
+                if (!weeklyBackupDir.exists()) {
+                    weeklyBackupDir.mkdirs();
+                }
+
+                // New backup file name format: "database_backup_15-03-2025.sql"
+                String backupFile = new File(weeklyBackupDir,
+                        database.getDatabaseName() + "_backup_" + currentDate + ".sql").getAbsolutePath();
+
+                executeMySQLBackup(database, backupFile);
+                System.out.println("Weekly Backup completed for database: " + database.getDatabaseName() + " (Date: " + currentDate + ")");
+            } catch (Exception e) {
+                System.err.println("Weekly Backup failed for database: " + database.getDatabaseName() + " - " + e.getMessage());
+            }
+        }
     }
 
-    public void MonthlyBackup() {
 
+    // @Scheduled(cron = "0 0 3 1 * ?") // Runs on the 1st day of every month at 3 AM (Commented for testing)
+    @Scheduled(cron = "0 */3 * * * ?") // Runs every 3 minutes for testing
+    public void MonthlyBackup() {
+        List<MySQLDatabaseConfig> databases = mysqlConfigLoader.getDatabases();
+        String month = LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM", Locale.ENGLISH));
+
+        for (MySQLDatabaseConfig database : databases) {
+            try {
+                File backupsDir = new File(database.getBackupsLocation());
+                if (!backupsDir.exists()) {
+                    backupsDir.mkdirs();
+                }
+
+                File monthlyBackupDir = new File(backupsDir, "Monthly_" + database.getDatabaseName());
+                if (!monthlyBackupDir.exists()) {
+                    monthlyBackupDir.mkdirs();
+                }
+
+                String backupFile = new File(monthlyBackupDir, database.getDatabaseName() + "_backup_" + month + ".sql").getAbsolutePath();
+
+                executeMySQLBackup(database, backupFile);
+                System.out.println("Monthly Backup completed for database: " + database.getDatabaseName());
+            } catch (Exception e) {
+                System.err.println("Monthly Backup failed for database: " + database.getDatabaseName() + " - " + e.getMessage());
+            }
+        }
     }
 
     public void executeMySQLBackup(MySQLDatabaseConfig mySQLDatabaseConfig, String backupFile) throws Exception {
-        // Getting the path to mysqldump using a utility method
         String MYSQLDUMP_PATH = DatabaseUtils.getDumpPath("mysqldump");
-        System.out.println(MYSQLDUMP_PATH);
 
-        // Constructing the backup command
         StringBuilder commandBuilder = new StringBuilder();
         commandBuilder.append(MYSQLDUMP_PATH)
-                .append(" -h").append(mySQLDatabaseConfig.getDatabaseHost())    // Host (localhost or remote IP)
-                .append(" -P").append(mySQLDatabaseConfig.getDatabasePort())    // Port (default: 3306)
-                .append(" -u").append(mySQLDatabaseConfig.getMysqlUsername())   // MySQL username
-                .append(" -p").append(mySQLDatabaseConfig.getMysqlPassword())   // MySQL password
-                .append(" ").append(mySQLDatabaseConfig.getDatabaseName());     // Database name
+                .append(" -h").append(mySQLDatabaseConfig.getDatabaseHost())
+                .append(" -P").append(mySQLDatabaseConfig.getDatabasePort())
+                .append(" -u").append(mySQLDatabaseConfig.getMysqlUsername())
+                .append(" -p").append(mySQLDatabaseConfig.getMysqlPassword())
+                .append(" ").append(mySQLDatabaseConfig.getDatabaseName());
 
-        // Always append the backupCommandOptions (even if empty)
         commandBuilder.append(" ").append(mySQLDatabaseConfig.getBackupCommandOptions());
 
-        // Create the command string
         String command = commandBuilder.toString();
 
-        // Using ProcessBuilder to execute the command
         ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
-        processBuilder.redirectOutput(new File(backupFile)); // Redirect output to back up file
-        processBuilder.redirectErrorStream(true); // Merge error stream with output stream
+        processBuilder.redirectOutput(new File(backupFile));
+        processBuilder.redirectErrorStream(true);
 
         try {
             Process process = processBuilder.start();
-            boolean finished = process.waitFor(10, TimeUnit.MINUTES); // Wait for the process to complete
+            boolean finished = process.waitFor(10, TimeUnit.MINUTES);
 
             if (!finished || process.exitValue() != 0) {
                 throw new IOException("Backup failed with exit code " + process.exitValue());
             }
         } catch (InterruptedException e) {
-            // Handle case where the backup process was interrupted
             Thread.currentThread().interrupt();
             throw new IOException("Backup interrupted", e);
         }
     }
-
 }
