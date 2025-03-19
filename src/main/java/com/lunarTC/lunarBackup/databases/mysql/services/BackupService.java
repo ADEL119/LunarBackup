@@ -23,8 +23,7 @@ public class BackupService {
     @Autowired
     MySQLConfigLoader mysqlConfigLoader;
 
-    // @Scheduled(cron = "0 0 1 * * ?") // Runs daily at 1 AM (Commented for testing)
-    @Scheduled(cron = "0 * * * * ?") // Runs every minute for testing
+
     public void DailyBackup() {
         List<MySQLDatabaseConfig> databases = mysqlConfigLoader.getDatabases();
 
@@ -53,8 +52,8 @@ public class BackupService {
 
 
 
-    // @Scheduled(cron = "0 0 2 ? * SAT") // Runs every Saturday at 2 AM
-    @Scheduled(cron = "0 */2 * * * ?") // Runs every 2 minutes for testing
+
+
     public void WeeklyBackup() {
         List<MySQLDatabaseConfig> databases = mysqlConfigLoader.getDatabases();
         LocalDate today = LocalDate.now();
@@ -87,8 +86,7 @@ public class BackupService {
     }
 
 
-    // @Scheduled(cron = "0 0 3 1 * ?") // Runs on the 1st day of every month at 3 AM (Commented for testing)
-    @Scheduled(cron = "0 */3 * * * ?") // Runs every 3 minutes for testing
+
     public void MonthlyBackup() {
         List<MySQLDatabaseConfig> databases = mysqlConfigLoader.getDatabases();
         String month = LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM", Locale.ENGLISH));
@@ -118,19 +116,15 @@ public class BackupService {
     public void executeMySQLBackup(MySQLDatabaseConfig mySQLDatabaseConfig, String backupFile) throws Exception {
         String MYSQLDUMP_PATH = DatabaseUtils.getDumpPath("mysqldump");
 
-        StringBuilder commandBuilder = new StringBuilder();
-        commandBuilder.append(MYSQLDUMP_PATH)
-                .append(" -h").append(mySQLDatabaseConfig.getDatabaseHost())
-                .append(" -P").append(mySQLDatabaseConfig.getDatabasePort())
-                .append(" -u").append(mySQLDatabaseConfig.getMysqlUsername())
-                .append(" -p").append(mySQLDatabaseConfig.getMysqlPassword())
-                .append(" ").append(mySQLDatabaseConfig.getDatabaseName());
+        ProcessBuilder processBuilder = new ProcessBuilder(
+                MYSQLDUMP_PATH,
+                "-h", mySQLDatabaseConfig.getDatabaseHost(),
+                "-P", mySQLDatabaseConfig.getDatabasePort(),
+                "-u", mySQLDatabaseConfig.getMysqlUsername(),
+                "-p" + mySQLDatabaseConfig.getMysqlPassword(), // Handle password safely
+                mySQLDatabaseConfig.getDatabaseName()
+        );
 
-        commandBuilder.append(" ").append(mySQLDatabaseConfig.getBackupCommandOptions());
-
-        String command = commandBuilder.toString();
-
-        ProcessBuilder processBuilder = new ProcessBuilder(command.split(" "));
         processBuilder.redirectOutput(new File(backupFile));
         processBuilder.redirectErrorStream(true);
 

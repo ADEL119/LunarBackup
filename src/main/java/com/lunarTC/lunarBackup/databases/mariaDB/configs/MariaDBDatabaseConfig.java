@@ -1,4 +1,4 @@
-package com.lunarTC.lunarBackup.databases.mysql.Configs;
+package com.lunarTC.lunarBackup.databases.mariaDB.configs;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,25 +6,25 @@ import lombok.Data;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL) // Ignore null fields during serialization
-public class MySQLDatabaseConfig {
+public class MariaDBDatabaseConfig {
 
     @JsonProperty("configName")
     private String configName;            // Name of the database configuration (e.g., "ProductionDB")
 
     @JsonProperty("databaseHost")
-    private String databaseHost;          // MySQL Server Host (e.g., "localhost" or "192.168.1.50")
+    private String databaseHost;          // MariaDB Server Host (e.g., "localhost" or "192.168.1.50")
 
     @JsonProperty("databasePort")
-    private String databasePort = "3306";      // MySQL Port (default: 3306)
+    private int databasePort = 3306;      // MariaDB Port (default: 3306)
 
     @JsonProperty("databaseName")
     private String databaseName;          // The database to back up or restore
 
-    @JsonProperty("mysqlUsername")
-    private String mysqlUsername;         // MySQL user with backup/restore privileges
+    @JsonProperty("mariaDBUsername")
+    private String mariaDBUsername;       // MariaDB user with backup/restore privileges
 
-    @JsonProperty("mysqlPassword")
-    private String mysqlPassword;         // Password for the MySQL user
+    @JsonProperty("mariaDBPassword")
+    private String mariaDBPassword;       // Password for the MariaDB user
 
     @JsonProperty("backupsLocation")
     private String backupsLocation;       // Directory where backup files will be saved
