@@ -1,5 +1,7 @@
 package com.lunarTC.lunarBackup.databases.mysql.services;
 
+import com.lunarTC.lunarBackup.databases.utils.BackupJob;
+import com.lunarTC.lunarBackup.databases.utils.DatabaseUtils;
 import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

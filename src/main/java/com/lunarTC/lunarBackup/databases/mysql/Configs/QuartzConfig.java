@@ -1,6 +1,6 @@
 package com.lunarTC.lunarBackup.databases.mysql.Configs;
 
-import com.lunarTC.lunarBackup.databases.mysql.services.BackupJob;
+import com.lunarTC.lunarBackup.databases.utils.BackupJob;
 import org.quartz.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +22,7 @@ public class QuartzConfig {
         return TriggerBuilder.newTrigger()
                 .forJob(dailyBackupJobDetail())
                 .withIdentity("DailyBackupTrigger", "BackupGroup")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 * * * * ?")) // Every minute
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */50 * * * ?")) // Every minute
                 .build();
     }
     @Bean
@@ -39,7 +39,7 @@ public class QuartzConfig {
         return TriggerBuilder.newTrigger()
                 .forJob(weeklyBackupJobDetail())
                 .withIdentity("WeeklyBackupTrigger", "BackupGroup")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 */2 * * * ?")) // Every Saturday at 2 AM
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */50 * * * ?")) // Every Saturday at 2 AM
                 .build();
     }
 
@@ -57,7 +57,7 @@ public class QuartzConfig {
         return TriggerBuilder.newTrigger()
                 .forJob(monthlyBackupJobDetail())
                 .withIdentity("MonthlyBackupTrigger", "BackupGroup")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 */3 * * * ?")) // 1st day of every month at 3 AM
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 */50 * * * ?")) // 1st day of every month at 3 AM
                 .build();
     }
 }
